@@ -1,0 +1,14 @@
+{
+  "name": "precojusto-backend",
+  "version": "1.0.0",
+  "description": "Backend do PreçoJusto",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0"
+  }
+}
