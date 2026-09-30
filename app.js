@@ -1,6 +1,6 @@
 "use strict";
 
-const API_URL = "/api";
+const API_URL = "https://precojusto.onrender.com/api";
 const TOKEN_KEY = "precojusto_token";
 
 let produtos = [];
