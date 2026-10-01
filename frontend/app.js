@@ -760,6 +760,36 @@ async function carregarProdutos() {
                 normalizarProduto
             );
 
+            const lojas = [
+    ...new Set(
+        produtos.flatMap(produto =>
+            Array.isArray(produto.precos)
+                ? produto.precos.map(preco => preco.loja)
+                : []
+        )
+    )
+].sort((a, b) =>
+    a.localeCompare(b, "pt-BR")
+);
+
+const storeFilterSelect =
+    document.getElementById("storeFilterSelect");
+
+if (storeFilterSelect) {
+    storeFilterSelect.innerHTML =
+        `<option value="todas">Todas as lojas</option>`;
+
+    lojas.forEach(loja => {
+        const option =
+            document.createElement("option");
+
+        option.value = loja;
+        option.textContent = loja;
+
+        storeFilterSelect.appendChild(option);
+    });
+}
+
         aplicarFiltros();
 
     } catch (erro) {
@@ -850,6 +880,16 @@ function aplicarFiltros() {
     let lista =
         [...produtos];
 
+
+        const minPrice =
+    Number(document.getElementById("minPriceInput")?.value || 0);
+
+const maxPrice =
+    Number(document.getElementById("maxPriceInput")?.value || Infinity);
+
+const storeFilter =
+    document.getElementById("storeFilterSelect")?.value || "todas";
+
     if (categoriaAtual !== "Todos") {
         lista =
             lista.filter(
@@ -889,6 +929,16 @@ function aplicarFiltros() {
                 }
             );
     }
+
+    lista = lista.filter(produto => {
+    const preco = Number(produto.menor_preco ?? 0);
+
+    const dentroDoPreco =
+        preco >= minPrice &&
+        preco <= maxPrice;
+
+    return dentroDoPreco;
+});
 
     if (ordenacaoAtual === "menor-preco") {
         lista.sort(
@@ -5263,3 +5313,57 @@ window.criarAlertaPreco =
 
 window.excluirAlerta =
     excluirAlerta;
+
+
+
+   // ================================
+// BOTÕES DOS FILTROS AVANÇADOS
+// ================================
+
+const applyFiltersButton = document.getElementById("applyFiltersButton");
+
+const clearFiltersButton = document.getElementById("clearFiltersButton");
+
+if (applyFiltersButton) {
+
+    applyFiltersButton.addEventListener("click", () => {
+
+        aplicarFiltros();
+
+    });
+
+}
+
+if (clearFiltersButton) {
+
+    clearFiltersButton.addEventListener("click", () => {
+
+        categoriaAtual = "Todos";
+        pesquisaAtual = "";
+
+        const minPriceInput =
+            document.getElementById("minPriceInput");
+
+        const maxPriceInput =
+            document.getElementById("maxPriceInput");
+
+        const storeFilterSelect =
+            document.getElementById("storeFilterSelect");
+
+        if (minPriceInput) {
+            minPriceInput.value = "";
+        }
+
+        if (maxPriceInput) {
+            maxPriceInput.value = "";
+        }
+
+        if (storeFilterSelect) {
+            storeFilterSelect.value = "todas";
+        }
+
+        aplicarFiltros();
+
+    });
+
+}

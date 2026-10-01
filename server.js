@@ -37,7 +37,7 @@ app.use(express.json());
 
 app.use(
     express.static(
-        path.join(__dirname, "../frontend")
+        path.join(__dirname, "frontend")
     )
 );
 
@@ -325,7 +325,26 @@ app.get("/api/produtos", (req, res) => {
             ORDER BY p.id
         `).all();
 
-        res.json(produtos);
+        const produtosComPrecos = produtos.map(produto => {
+            const precos = db.prepare(`
+                SELECT
+                    loja,
+                    preco,
+                    data,
+                    url
+                FROM precos
+                WHERE produto_id = ?
+                ORDER BY preco ASC
+            `).all(produto.id);
+
+            return {
+                ...produto,
+                precos
+            };
+        });
+
+        res.json(produtosComPrecos);
+
     } catch (erro) {
         console.error(erro);
 
@@ -334,7 +353,6 @@ app.get("/api/produtos", (req, res) => {
         });
     }
 });
-
 // ==================================================
 // PRODUTO INDIVIDUAL
 // ==================================================
