@@ -890,6 +890,15 @@ const maxPrice =
 const storeFilter =
     document.getElementById("storeFilterSelect")?.value || "todas";
 
+    if (storeFilter !== "todas") {
+    lista = lista.filter(produto => {
+        return Array.isArray(produto.precos) &&
+            produto.precos.some(preco =>
+                preco.loja === storeFilter
+            );
+    });
+}
+
     if (categoriaAtual !== "Todos") {
         lista =
             lista.filter(
