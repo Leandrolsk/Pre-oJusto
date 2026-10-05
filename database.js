@@ -317,7 +317,8 @@ if (quantidadePrecos.total === 0) {
         {
             produto: "iPhone 15 128GB",
             loja: "Mercado Livre",
-            preco: 4099.90
+            preco: 4099.90,
+            url: "https://meli.la/2VuJg94"
         },
         {
             produto: "AirPods Pro 2",
@@ -345,10 +346,11 @@ if (quantidadePrecos.total === 0) {
             preco: 3499.90
         },
         {
-            produto: "PlayStation 5 Slim",
-            loja: "Mercado Livre",
-            preco: 3399.90
-        },
+    produto: "PlayStation 5 Slim",
+    loja: "Mercado Livre",
+    preco: 3399.90,
+    url: "https://meli.la/18AxuLM"
+},
         {
             produto: "Samsung Galaxy S24",
             loja: "Amazon",
@@ -418,10 +420,10 @@ if (quantidadePrecos.total === 0) {
     `);
 
     const inserirPreco = db.prepare(`
-        INSERT INTO precos
-        (produto_id, loja, preco, data)
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-    `);
+    INSERT INTO precos
+    (produto_id, loja, preco, data, url)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
+`);
 
     const inserirPrecos = db.transaction(() => {
         for (const item of precosIniciais) {
@@ -429,10 +431,11 @@ if (quantidadePrecos.total === 0) {
 
             if (produto) {
                 inserirPreco.run(
-                    produto.id,
-                    item.loja,
-                    item.preco
-                );
+    produto.id,
+    item.loja,
+    item.preco,
+    item.url || null
+);
             }
         }
     });
@@ -441,6 +444,35 @@ if (quantidadePrecos.total === 0) {
 
     console.log("Preços iniciais cadastrados.");
 }
+
+// ============================================================
+// ATUALIZAÇÃO DOS LINKS DAS LOJAS
+// ============================================================
+
+const atualizarUrlLoja = db.prepare(`
+    UPDATE precos
+    SET url = ?
+    WHERE produto_id = (
+        SELECT id
+        FROM produtos
+        WHERE nome = ?
+    )
+    AND loja = ?
+`);
+
+atualizarUrlLoja.run(
+    "https://meli.la/2VuJg94",
+    "iPhone 15 128GB",
+    "Mercado Livre"
+);
+
+atualizarUrlLoja.run(
+    "https://meli.la/18AxuLM",
+    "PlayStation 5 Slim",
+    "Mercado Livre"
+);
+
+console.log("Links das lojas atualizados.");
 
 // ============================================================
 // FINAL
