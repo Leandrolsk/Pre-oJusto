@@ -3902,6 +3902,11 @@ function criarItemLojaPagina(
     const preco = Number(item.preco);
     const diferenca = preco - menorPreco;
 
+    const url =
+        typeof item.url === "string"
+            ? item.url.trim()
+            : "";
+
     return `
         <div class="store-item-page">
             <div>
@@ -3945,6 +3950,21 @@ function criarItemLojaPagina(
                         <span class="store-best-badge">
                             MENOR PREÇO
                         </span>
+                    `
+                    : ""
+            }
+
+            ${
+                url
+                    ? `
+                        <a
+                            class="store-link-page"
+                            href="${escaparHTML(url)}"
+                            target="_blank"
+                            rel="noopener noreferrer sponsored"
+                        >
+                            Ir para loja →
+                        </a>
                     `
                     : ""
             }
