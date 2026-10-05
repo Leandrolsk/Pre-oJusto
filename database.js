@@ -475,9 +475,350 @@ atualizarUrlLoja.run(
 console.log("Links das lojas atualizados.");
 
 // ============================================================
+// NOVOS PRODUTOS DO MERCADO LIVRE
+// ============================================================
+
+const novosProdutosMercadoLivre = [
+    {
+        nome: "Xbox Series S 512GB",
+        categoria: "Games",
+        descricao:
+            "Console Microsoft Xbox Series S com 512GB de armazenamento.",
+        imagem:
+            "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=900&q=80",
+        preco: 3987.00,
+        url: "https://meli.la/1bpq5js"
+    },
+    {
+        nome: "Controle Xbox Wireless Series X|S",
+        categoria: "Games",
+        descricao:
+            "Controle sem fio Xbox Wireless para Xbox Series X|S.",
+        imagem:
+            "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=80",
+        preco: 464.31,
+        url: "https://meli.la/2Cghw2C"
+    },
+    {
+        nome: "Controle DualSense PS5",
+        categoria: "Games",
+        descricao:
+            "Controle sem fio Sony DualSense para PlayStation 5.",
+        imagem:
+            "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=80",
+        preco: 449.00,
+        url: "https://meli.la/1qQCVB5"
+    },
+    {
+        nome: "JBL Tune 520BT",
+        categoria: "Fones",
+        descricao:
+            "Fone de ouvido Bluetooth JBL Tune 520BT.",
+        imagem:
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80",
+        preco: 269.90,
+        url: "https://meli.la/1zeNtzp"
+    },
+    {
+        nome: "Samsung Galaxy Buds3 FE",
+        categoria: "Fones",
+        descricao:
+            "Fone de ouvido sem fio Samsung Galaxy Buds3 FE.",
+        imagem:
+            "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=900&q=80",
+        preco: 719.10,
+        url: "https://meli.la/2XdA3kU"
+    },
+    {
+        nome: "Redragon Kumara Elite",
+        categoria: "Periféricos",
+        descricao:
+            "Teclado mecânico gamer Redragon Kumara Elite.",
+        imagem:
+            "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80",
+        preco: 375.99,
+        url: "https://meli.la/1DaKzUx"
+    },
+    {
+        nome: "Logitech G203 LIGHTSYNC",
+        categoria: "Periféricos",
+        descricao:
+            "Mouse gamer Logitech G203 LIGHTSYNC.",
+        imagem:
+            "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=80",
+        preco: 89.90,
+        url: "https://meli.la/2TwPt8c"
+    },
+    {
+        nome: "Logitech G305 Lightspeed",
+        categoria: "Periféricos",
+        descricao:
+            "Mouse gamer sem fio Logitech G305 Lightspeed.",
+        imagem:
+            "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=80",
+        preco: 260.13,
+        url: "https://meli.la/1yUNBcv"
+    },
+    {
+        nome: "Samsung Galaxy A56 5G 256GB",
+        categoria: "Celulares",
+        descricao:
+            "Smartphone Samsung Galaxy A56 5G com 256GB de armazenamento.",
+        imagem:
+            "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=900&q=80",
+        preco: 2299.00,
+        url: "https://meli.la/2CJVuPX"
+    },
+    {
+        nome: "Samsung Galaxy S25 5G 256GB",
+        categoria: "Celulares",
+        descricao:
+            "Smartphone Samsung Galaxy S25 5G com 256GB de armazenamento.",
+        imagem:
+            "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=900&q=80",
+        preco: 3628.00,
+        url: "https://meli.la/1D6osn9"
+    },
+    {
+        nome: "iPhone 16 128GB",
+        categoria: "Celulares",
+        descricao:
+            "Apple iPhone 16 com 128GB de armazenamento.",
+        imagem:
+            "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=80",
+        preco: 4558.00,
+        url: "https://meli.la/21NKB21"
+    },
+    {
+        nome: "Acer Aspire 5 Ryzen 5",
+        categoria: "Notebooks",
+        descricao:
+            "Notebook Acer Aspire 5 com Ryzen 5, 8GB de RAM e SSD de 256GB.",
+        imagem:
+            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80",
+        preco: 3103.00,
+        url: "https://meli.la/2zqksnS"
+    },
+    {
+        nome: "Lenovo LOQ 15IRX9",
+        categoria: "Notebooks",
+        descricao:
+            "Notebook gamer Lenovo LOQ 15IRX9 com Intel Core i5, 16GB de RAM e SSD de 512GB.",
+        imagem:
+            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80",
+        preco: 7887.00,
+        url: "https://meli.la/1rKXQf9"
+    },
+    {
+        nome: 'MacBook Air 15" M5 512GB',
+        categoria: "Notebooks",
+        descricao:
+            "Apple MacBook Air de 15 polegadas com chip M5 e SSD de 512GB.",
+        imagem:
+            "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80",
+        preco: 14443.00,
+        url: "https://meli.la/1tiUCPd"
+    },
+    {
+        nome: 'LG UltraGear 24" 144Hz',
+        categoria: "Monitores",
+        descricao:
+            "Monitor gamer LG UltraGear de 24 polegadas, Full HD e 144Hz.",
+        imagem:
+            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=900&q=80",
+        preco: 645.05,
+        url: "https://meli.la/1EKpB3S"
+    },
+    {
+        nome: 'Samsung Odyssey G40 27" 240Hz',
+        categoria: "Monitores",
+        descricao:
+            "Monitor gamer Samsung Odyssey G40 de 27 polegadas e 240Hz.",
+        imagem:
+            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=900&q=80",
+        preco: 1192.00,
+        url: "https://meli.la/1YSMRSe"
+    },
+    {
+        nome: "SSD Kingston NV3 1TB",
+        categoria: "Armazenamento",
+        descricao:
+            "SSD Kingston NV3 1TB M.2 NVMe PCIe 4.0.",
+        imagem:
+            "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=900&q=80",
+        preco: 1077.00,
+        url: "https://meli.la/2gM4B1F"
+    },
+    {
+        nome: "Nintendo Switch 2 + Mario Kart World",
+        categoria: "Games",
+        descricao:
+            "Console Nintendo Switch 2 em bundle com Mario Kart World.",
+        imagem:
+            "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=80",
+        preco: 4464.00,
+        url: "https://meli.la/2RSqHaz"
+    },
+    {
+        nome: 'Samsung Smart TV 50" Mini LED 4K M75H',
+        categoria: "TVs",
+        descricao:
+            "Samsung Smart TV de 50 polegadas Mini LED 4K M75H.",
+        imagem:
+            "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=900&q=80",
+        preco: 2839.00,
+        url: "https://meli.la/2r8B5p8"
+    }
+];
+
+
+// ============================================================
+// CADASTRA / ATUALIZA OS NOVOS PRODUTOS
+// ============================================================
+
+const buscarNovoProduto = db.prepare(`
+    SELECT id
+    FROM produtos
+    WHERE nome = ?
+    ORDER BY id ASC
+    LIMIT 1
+`);
+
+const inserirNovoProduto = db.prepare(`
+    INSERT INTO produtos (
+        nome,
+        categoria,
+        descricao,
+        imagem
+    )
+    VALUES (?, ?, ?, ?)
+`);
+
+const atualizarNovoProduto = db.prepare(`
+    UPDATE produtos
+    SET
+        categoria = ?,
+        descricao = ?,
+        imagem = ?
+    WHERE id = ?
+`);
+
+const buscarOfertaMercadoLivre = db.prepare(`
+    SELECT id
+    FROM precos
+    WHERE produto_id = ?
+    AND loja = 'Mercado Livre'
+    ORDER BY id DESC
+    LIMIT 1
+`);
+
+const inserirOfertaMercadoLivre = db.prepare(`
+    INSERT INTO precos (
+        produto_id,
+        loja,
+        preco,
+        data,
+        url
+    )
+    VALUES (
+        ?,
+        'Mercado Livre',
+        ?,
+        CURRENT_TIMESTAMP,
+        ?
+    )
+`);
+
+const atualizarOfertaMercadoLivre = db.prepare(`
+    UPDATE precos
+    SET
+        preco = ?,
+        url = ?,
+        data = CURRENT_TIMESTAMP
+    WHERE id = ?
+`);
+
+
+const sincronizarNovosProdutos = db.transaction(() => {
+
+    for (
+        const item
+        of novosProdutosMercadoLivre
+    ) {
+
+        let produto =
+            buscarNovoProduto.get(
+                item.nome
+            );
+
+        if (!produto) {
+
+            const resultado =
+                inserirNovoProduto.run(
+                    item.nome,
+                    item.categoria,
+                    item.descricao,
+                    item.imagem
+                );
+
+            produto = {
+                id:
+                    Number(
+                        resultado.lastInsertRowid
+                    )
+            };
+
+        } else {
+
+            atualizarNovoProduto.run(
+                item.categoria,
+                item.descricao,
+                item.imagem,
+                produto.id
+            );
+        }
+
+
+        const ofertaExistente =
+            buscarOfertaMercadoLivre.get(
+                produto.id
+            );
+
+
+        if (ofertaExistente) {
+
+            atualizarOfertaMercadoLivre.run(
+                item.preco,
+                item.url,
+                ofertaExistente.id
+            );
+
+        } else {
+
+            inserirOfertaMercadoLivre.run(
+                produto.id,
+                item.preco,
+                item.url
+            );
+        }
+    }
+});
+
+
+sincronizarNovosProdutos();
+
+
+console.log(
+    "19 produtos do Mercado Livre sincronizados."
+);
+
+
+// ============================================================
 // FINAL
 // ============================================================
 
-console.log("Banco de dados PreçoJusto carregado.");
+console.log(
+    "Banco de dados PreçoJusto carregado."
+);
 
 module.exports = db;
