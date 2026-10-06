@@ -1468,7 +1468,53 @@ function calcularQualidadeAtributos(candidato) {
         return 0;
     }
 
-    function calcularCompatibilidadeAtributos(
+   
+
+    const atributos = candidato.atributos;
+
+    let pontos = 0;
+
+    const atributosImportantes = [
+        "BRAND",
+        "MODEL",
+        "SUBMODEL",
+        "DETAILED_MODEL",
+        "ALPHANUMERIC_MODEL",
+        "CAPACITY",
+        "COLOR",
+        "MAIN_COLOR",
+        "EDITION",
+        "MANUFACTURER",
+        "MPN"
+    ];
+
+    for (const id of atributosImportantes) {
+        const atributo = atributos.find(
+            item =>
+                item.id === id &&
+                item.valor
+        );
+
+        if (atributo) {
+            pontos += 10;
+        }
+    }
+
+    const quantidadePreenchida =
+        atributos.filter(
+            atributo => atributo.valor
+        ).length;
+
+    pontos += Math.min(
+        quantidadePreenchida,
+        50
+    );
+
+    return pontos;
+}
+
+
+ function calcularCompatibilidadeAtributos(
     nomeProduto,
     candidato
 ) {
@@ -1523,48 +1569,6 @@ function calcularQualidadeAtributos(candidato) {
     );
 }
 
-    const atributos = candidato.atributos;
-
-    let pontos = 0;
-
-    const atributosImportantes = [
-        "BRAND",
-        "MODEL",
-        "SUBMODEL",
-        "DETAILED_MODEL",
-        "ALPHANUMERIC_MODEL",
-        "CAPACITY",
-        "COLOR",
-        "MAIN_COLOR",
-        "EDITION",
-        "MANUFACTURER",
-        "MPN"
-    ];
-
-    for (const id of atributosImportantes) {
-        const atributo = atributos.find(
-            item =>
-                item.id === id &&
-                item.valor
-        );
-
-        if (atributo) {
-            pontos += 10;
-        }
-    }
-
-    const quantidadePreenchida =
-        atributos.filter(
-            atributo => atributo.valor
-        ).length;
-
-    pontos += Math.min(
-        quantidadePreenchida,
-        50
-    );
-
-    return pontos;
-}
 
 // ==================================================
 // TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
