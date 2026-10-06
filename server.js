@@ -1161,6 +1161,16 @@ function normalizarTextoMercadoLivre(texto) {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
+
+        // Padroniza capacidades:
+        // "256 GB" vira "256gb"
+        // "512 GB" vira "512gb"
+        // "1 TB" vira "1tb"
+        .replace(
+            /(\d+(?:[.,]\d+)?)\s*(gb|tb|mb)\b/g,
+            "$1$2"
+        )
+
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
 }
