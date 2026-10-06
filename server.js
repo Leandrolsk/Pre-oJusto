@@ -1172,6 +1172,11 @@ const resposta = await fetch(url, {
                 .filter(Boolean)
             : [];
 
+         console.log(
+            "Resposta completa do Mercado Livre:",
+         JSON.stringify(dados, null, 2)
+         );
+
         res.json({
             id: dados.id || catalogId,
             nome: dados.name || null,
