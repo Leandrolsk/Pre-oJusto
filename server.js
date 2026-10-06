@@ -1116,7 +1116,119 @@ app.get("/api/mercadolivre/callback", async (req, res) => {
     }
 });
 
+    async function buscarProdutosCatalogoMercadoLivre(termo) {
+    if (!mlAccessToken) {
+        const erro = new Error(
+            "Mercado Livre ainda não foi autorizado."
+        );
 
+        erro.status = 401;
+        throw erro;
+    }
+
+    const url =
+        "https://api.mercadolibre.com/products/search" +
+        `?status=active&site_id=MLB&q=${encodeURIComponent(termo)}`;
+
+    const resposta = await fetch(url, {
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${mlAccessToken}`
+        }
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+        const erro = new Error(
+            "Erro ao pesquisar produto no Mercado Livre."
+        );
+
+        erro.status = resposta.status;
+        erro.detalhes = dados;
+
+        throw erro;
+    }
+
+    return Array.isArray(dados.results)
+        ? dados.results
+        : [];
+}
+
+
+function normalizarTextoMercadoLivre(texto) {
+    return String(texto || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+function calcularCompatibilidadeProduto(
+    nomeProduto,
+    produtoMercadoLivre
+) {
+    const nomeBase =
+        normalizarTextoMercadoLivre(nomeProduto);
+
+    const nomeResultado =
+        normalizarTextoMercadoLivre(
+            produtoMercadoLivre?.name
+        );
+
+    if (!nomeBase || !nomeResultado) {
+        return 0;
+    }
+
+    const palavrasBase = [
+        ...new Set(
+            nomeBase
+                .split(" ")
+                .filter(palavra => palavra.length >= 2)
+        )
+    ];
+
+    if (palavrasBase.length === 0) {
+        return 0;
+    }
+
+    let palavrasEncontradas = 0;
+
+    for (const palavra of palavrasBase) {
+        const palavrasResultado =
+            nomeResultado.split(" ");
+
+        if (palavrasResultado.includes(palavra)) {
+            palavrasEncontradas++;
+        }
+    }
+
+    const pontuacao =
+        (palavrasEncontradas / palavrasBase.length) * 100;
+
+    return Math.round(pontuacao);
+}
+
+
+function ordenarProdutosPorCompatibilidade(
+    nomeProduto,
+    resultados
+) {
+    return resultados
+        .map(produto => ({
+            produto,
+            compatibilidade:
+                calcularCompatibilidadeProduto(
+                    nomeProduto,
+                    produto
+                )
+        }))
+        .sort(
+            (a, b) =>
+                b.compatibilidade - a.compatibilidade
+        );
+}
 
 
 // ==================================================
@@ -1127,7 +1239,9 @@ app.get(
     "/api/mercadolivre/buscar-produto",
     async (req, res) => {
         try {
-            const termo = String(req.query.q || "").trim();
+            const termo = String(
+                req.query.q || ""
+            ).trim();
 
             if (!termo) {
                 return res.status(400).json({
@@ -1135,49 +1249,44 @@ app.get(
                 });
             }
 
-            if (!mlAccessToken) {
-                return res.status(401).json({
-                    erro: "Mercado Livre ainda não foi autorizado."
-                });
-            }
+            const resultados =
+                await buscarProdutosCatalogoMercadoLivre(
+                    termo
+                );
 
-            const url =
-                "https://api.mercadolibre.com/products/search" +
-                `?status=active&site_id=MLB&q=${encodeURIComponent(termo)}`;
-
-            const resposta = await fetch(url, {
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${mlAccessToken}`
-                }
-            });
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                return res.status(resposta.status).json({
-                    erro: "Erro ao pesquisar produto no Mercado Livre.",
-                    status: resposta.status,
-                    detalhes: dados
-                });
-            }
-
-            const resultados = Array.isArray(dados.results)
-                ? dados.results
-                : [];
+            const resultadosOrdenados =
+                ordenarProdutosPorCompatibilidade(
+                    termo,
+                    resultados
+                );
 
             res.json({
                 busca: termo,
-                total: resultados.length,
-                produtos: resultados.map(produto => ({
-                    id: produto.id || null,
-                    nome: produto.name || null,
-                    dominio: produto.domain_id || null,
-                    imagem:
-                        produto.pictures?.[0]?.url ||
-                        produto.pictures?.[0]?.secure_url ||
-                        null
-                }))
+                total: resultadosOrdenados.length,
+
+                produtos: resultadosOrdenados.map(
+                    item => ({
+                        compatibilidade:
+                            item.compatibilidade,
+
+                        id:
+                            item.produto.id ||
+                            null,
+
+                        nome:
+                            item.produto.name ||
+                            null,
+
+                        dominio:
+                            item.produto.domain_id ||
+                            null,
+
+                        imagem:
+                            item.produto.pictures?.[0]?.url ||
+                            item.produto.pictures?.[0]?.secure_url ||
+                            null
+                    })
+                )
             });
 
         } catch (erro) {
@@ -1186,14 +1295,27 @@ app.get(
                 erro
             );
 
+            if (erro.status === 401) {
+                return res.status(401).json({
+                    erro: erro.message
+                });
+            }
+
+            if (erro.status) {
+                return res.status(erro.status).json({
+                    erro: erro.message,
+                    status: erro.status,
+                    detalhes: erro.detalhes || null
+                });
+            }
+
             res.status(500).json({
-                erro: "Não foi possível pesquisar o catálogo."
+                erro:
+                    "Não foi possível pesquisar o catálogo."
             });
         }
     }
 );
-
-
 
 // ==================================================
 // TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
