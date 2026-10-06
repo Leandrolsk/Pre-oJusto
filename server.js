@@ -1264,6 +1264,7 @@ const resposta = await fetch(url, {
             id: dados.id || catalogId,
             nome: dados.name || null,
             dominio: dados.domain_id || null,
+             buyBoxWinner: dados.buy_box_winner || null,
             imagem: imagens[0] || null,
             imagens,
             atributos: Array.isArray(dados.attributes)
