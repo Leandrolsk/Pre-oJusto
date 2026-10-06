@@ -3,6 +3,16 @@ const path = require("path");
 const crypto = require("crypto");
 const db = require("./database");
 
+// ================================
+// MERCADO LIVRE - CONFIGURAÇÃO OAUTH
+// ================================
+
+const ML_CLIENT_ID = process.env.ML_CLIENT_ID;
+const ML_CLIENT_SECRET = process.env.ML_CLIENT_SECRET;
+
+const ML_REDIRECT_URI =
+    "https://precojusto.onrender.com/api/mercadolivre/callback";
+
 const app = express();
 
 // ================================
@@ -994,6 +1004,193 @@ app.delete("/api/alertas/:id", (req, res) => {
         });
     }
 });
+
+
+
+// ==================================================
+// MERCADO LIVRE - INICIAR AUTORIZAÇÃO
+// ==================================================
+
+app.get("/api/mercadolivre/autorizar", (req, res) => {
+    if (!ML_CLIENT_ID) {
+        return res.status(500).json({
+            erro: "ML_CLIENT_ID não configurado."
+        });
+    }
+
+    const urlAutorizacao =
+        "https://auth.mercadolivre.com.br/authorization" +
+        "?response_type=code" +
+        `&client_id=${encodeURIComponent(ML_CLIENT_ID)}` +
+        `&redirect_uri=${encodeURIComponent(ML_REDIRECT_URI)}`;
+
+    res.redirect(urlAutorizacao);
+});
+
+
+
+// ==================================================
+// MERCADO LIVRE - CALLBACK OAUTH
+// ==================================================
+
+app.get("/api/mercadolivre/callback", async (req, res) => {
+    try {
+        const { code, error } = req.query;
+
+        if (error) {
+            return res.status(400).json({
+                erro: "Autorização do Mercado Livre recusada.",
+                detalhes: error
+            });
+        }
+
+        if (!code) {
+            return res.status(400).json({
+                erro: "Código de autorização não recebido."
+            });
+        }
+
+        if (!ML_CLIENT_ID || !ML_CLIENT_SECRET) {
+            return res.status(500).json({
+                erro: "Credenciais do Mercado Livre não configuradas."
+            });
+        }
+
+        const resposta = await fetch(
+            "https://api.mercadolibre.com/oauth/token",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    grant_type: "authorization_code",
+                    client_id: ML_CLIENT_ID,
+                    client_secret: ML_CLIENT_SECRET,
+                    code,
+                    redirect_uri: ML_REDIRECT_URI
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            console.error(
+                "Erro ao gerar token do Mercado Livre:",
+                dados
+            );
+
+            return res.status(resposta.status).json({
+                erro: "Não foi possível gerar o Access Token.",
+                detalhes: dados
+            });
+        }
+
+        // Por enquanto apenas confirmamos que a autorização funcionou.
+        // Não exibimos os tokens no navegador.
+        console.log(
+            "Mercado Livre autorizado com sucesso."
+        );
+
+        res.json({
+            sucesso: true,
+            mensagem:
+                "PreçoJusto conectado ao Mercado Livre com sucesso."
+        });
+
+    } catch (erro) {
+        console.error(
+            "Erro no callback do Mercado Livre:",
+            erro
+        );
+
+        res.status(500).json({
+            erro: "Erro ao concluir autorização do Mercado Livre."
+        });
+    }
+});
+
+
+
+// ==================================================
+// TESTE - API DO MERCADO LIVRE
+// ==================================================
+
+app.get("/api/mercadolivre/produto/:catalogId", async (req, res) => {
+    try {
+        const catalogId = req.params.catalogId
+            .trim()
+            .toUpperCase();
+
+        if (!/^MLB\d+$/.test(catalogId)) {
+            return res.status(400).json({
+                erro: "ID de catálogo inválido."
+            });
+        }
+
+        const url =
+            `https://api.mercadolibre.com/products/${catalogId}`;
+
+        const resposta = await fetch(url, {
+            headers: {
+                Accept: "application/json"
+            }
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            console.error(
+                "Erro Mercado Livre:",
+                resposta.status,
+                dados
+            );
+
+            return res.status(resposta.status).json({
+                erro: "Erro ao consultar o Mercado Livre.",
+                status: resposta.status,
+                detalhes: dados
+            });
+        }
+
+        const imagens = Array.isArray(dados.pictures)
+            ? dados.pictures
+                .map(imagem => imagem.url || imagem.secure_url)
+                .filter(Boolean)
+            : [];
+
+        res.json({
+            id: dados.id || catalogId,
+            nome: dados.name || null,
+            dominio: dados.domain_id || null,
+            imagem: imagens[0] || null,
+            imagens,
+            atributos: Array.isArray(dados.attributes)
+                ? dados.attributes.map(atributo => ({
+                    id: atributo.id,
+                    nome: atributo.name,
+                    valor:
+                        atributo.value_name ||
+                        atributo.value_id ||
+                        null
+                }))
+                : []
+        });
+
+    } catch (erro) {
+        console.error(
+            "Erro ao consultar API do Mercado Livre:",
+            erro
+        );
+
+        res.status(500).json({
+            erro: "Não foi possível consultar o Mercado Livre."
+        });
+    }
+});
+
 
 // ==================================================
 // STATUS
