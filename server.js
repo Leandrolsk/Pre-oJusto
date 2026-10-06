@@ -1119,6 +1119,89 @@ app.get("/api/mercadolivre/callback", async (req, res) => {
 
 
 // ==================================================
+// TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
+// ==================================================
+
+app.get(
+    "/api/mercadolivre/ofertas/:catalogId",
+    async (req, res) => {
+        try {
+            const catalogId = req.params.catalogId
+                .trim()
+                .toUpperCase();
+
+            if (!/^MLB\d+$/.test(catalogId)) {
+                return res.status(400).json({
+                    erro: "ID de catálogo inválido."
+                });
+            }
+
+            if (!mlAccessToken) {
+                return res.status(401).json({
+                    erro: "Mercado Livre ainda não foi autorizado."
+                });
+            }
+
+            const url =
+                "https://api.mercadolibre.com/sites/MLB/search" +
+                `?catalog_product_id=${encodeURIComponent(catalogId)}`;
+
+            const resposta = await fetch(url, {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${mlAccessToken}`
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                return res.status(resposta.status).json({
+                    erro: "Erro ao buscar ofertas do Mercado Livre.",
+                    status: resposta.status,
+                    detalhes: dados
+                });
+            }
+
+            const resultados = Array.isArray(dados.results)
+                ? dados.results
+                : [];
+
+            res.json({
+                catalogId,
+                total:
+                    dados.paging?.total ??
+                    resultados.length,
+                ofertas: resultados.map(item => ({
+                    id: item.id || null,
+                    titulo: item.title || null,
+                    preco: item.price ?? null,
+                    precoOriginal:
+                        item.original_price ?? null,
+                    moeda: item.currency_id || null,
+                    disponivel:
+                        item.available_quantity ?? null,
+                    condicao: item.condition || null,
+                    link: item.permalink || null,
+                    imagem: item.thumbnail || null
+                }))
+            });
+
+        } catch (erro) {
+            console.error(
+                "Erro ao buscar ofertas do Mercado Livre:",
+                erro
+            );
+
+            res.status(500).json({
+                erro: "Não foi possível buscar as ofertas."
+            });
+        }
+    }
+);
+
+
+// ==================================================
 // TESTE - API DO MERCADO LIVRE
 // ==================================================
 
