@@ -1272,6 +1272,7 @@ app.get(
 
                 const melhoresCandidatos =
     await buscarDetalhesMelhoresCandidatos(
+        termo,
         resultadosOrdenados
     );
 
@@ -1413,6 +1414,7 @@ function obterMelhoresCandidatos(resultadosOrdenados) {
 
 
 async function buscarDetalhesMelhoresCandidatos(
+    nomeProduto,
     resultadosOrdenados
 ) {
     const melhoresCandidatos =
@@ -1440,9 +1442,15 @@ return {
     ...candidato,
 
     qualidadeAtributos:
-        calcularQualidadeAtributos(
-            candidato
-        )
+    calcularQualidadeAtributos(
+        candidato
+    ),
+
+compatibilidadeAtributos:
+    calcularCompatibilidadeAtributos(
+        nomeProduto,
+        candidato
+    )
 };
                 }
             )
@@ -1459,6 +1467,61 @@ function calcularQualidadeAtributos(candidato) {
     ) {
         return 0;
     }
+
+    function calcularCompatibilidadeAtributos(
+    nomeProduto,
+    candidato
+) {
+    if (
+        !nomeProduto ||
+        !candidato ||
+        !Array.isArray(candidato.atributos)
+    ) {
+        return 0;
+    }
+
+    const nomeNormalizado =
+        normalizarTextoMercadoLivre(nomeProduto);
+
+    const palavrasProduto = [
+        ...new Set(
+            nomeNormalizado
+                .split(" ")
+                .filter(palavra => palavra.length >= 2)
+        )
+    ];
+
+    if (palavrasProduto.length === 0) {
+        return 0;
+    }
+
+    const textoAtributos =
+        candidato.atributos
+            .filter(atributo => atributo.valor)
+            .map(atributo => atributo.valor)
+            .join(" ");
+
+    const atributosNormalizados =
+        normalizarTextoMercadoLivre(
+            textoAtributos
+        );
+
+    const palavrasAtributos =
+        atributosNormalizados.split(" ");
+
+    let encontradas = 0;
+
+    for (const palavra of palavrasProduto) {
+        if (palavrasAtributos.includes(palavra)) {
+            encontradas++;
+        }
+    }
+
+    return Math.round(
+        (encontradas / palavrasProduto.length) *
+        100
+    );
+}
 
     const atributos = candidato.atributos;
 
