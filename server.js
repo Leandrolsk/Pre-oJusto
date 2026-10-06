@@ -1118,6 +1118,83 @@ app.get("/api/mercadolivre/callback", async (req, res) => {
 
 
 
+
+// ==================================================
+// TESTE - BUSCAR PRODUTO NO CATÁLOGO MERCADO LIVRE
+// ==================================================
+
+app.get(
+    "/api/mercadolivre/buscar-produto",
+    async (req, res) => {
+        try {
+            const termo = String(req.query.q || "").trim();
+
+            if (!termo) {
+                return res.status(400).json({
+                    erro: "Informe um produto para pesquisar."
+                });
+            }
+
+            if (!mlAccessToken) {
+                return res.status(401).json({
+                    erro: "Mercado Livre ainda não foi autorizado."
+                });
+            }
+
+            const url =
+                "https://api.mercadolibre.com/products/search" +
+                `?status=active&site_id=MLB&q=${encodeURIComponent(termo)}`;
+
+            const resposta = await fetch(url, {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${mlAccessToken}`
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                return res.status(resposta.status).json({
+                    erro: "Erro ao pesquisar produto no Mercado Livre.",
+                    status: resposta.status,
+                    detalhes: dados
+                });
+            }
+
+            const resultados = Array.isArray(dados.results)
+                ? dados.results
+                : [];
+
+            res.json({
+                busca: termo,
+                total: resultados.length,
+                produtos: resultados.map(produto => ({
+                    id: produto.id || null,
+                    nome: produto.name || null,
+                    dominio: produto.domain_id || null,
+                    imagem:
+                        produto.pictures?.[0]?.url ||
+                        produto.pictures?.[0]?.secure_url ||
+                        null
+                }))
+            });
+
+        } catch (erro) {
+            console.error(
+                "Erro ao pesquisar catálogo do Mercado Livre:",
+                erro
+            );
+
+            res.status(500).json({
+                erro: "Não foi possível pesquisar o catálogo."
+            });
+        }
+    }
+);
+
+
+
 // ==================================================
 // TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
 // ==================================================
