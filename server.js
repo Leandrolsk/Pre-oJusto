@@ -13,6 +13,9 @@ const ML_CLIENT_SECRET = process.env.ML_CLIENT_SECRET;
 const ML_REDIRECT_URI =
     "https://precojusto.onrender.com/api/mercadolivre/callback";
 
+let mlAccessToken = null;
+let mlRefreshToken = null;
+
 const app = express();
 
 // ================================
@@ -1088,10 +1091,11 @@ app.get("/api/mercadolivre/callback", async (req, res) => {
             });
         }
 
-        // Por enquanto apenas confirmamos que a autorização funcionou.
-        // Não exibimos os tokens no navegador.
-        console.log(
-            "Mercado Livre autorizado com sucesso."
+             mlAccessToken = dados.access_token;
+             mlRefreshToken = dados.refresh_token || null;
+
+             console.log(
+             "Mercado Livre autorizado com sucesso."
         );
 
         res.json({
@@ -1133,11 +1137,18 @@ app.get("/api/mercadolivre/produto/:catalogId", async (req, res) => {
         const url =
             `https://api.mercadolibre.com/products/${catalogId}`;
 
-        const resposta = await fetch(url, {
-            headers: {
-                Accept: "application/json"
-            }
-        });
+        if (!mlAccessToken) {
+    return res.status(401).json({
+        erro: "Mercado Livre ainda não foi autorizado."
+    });
+}
+
+const resposta = await fetch(url, {
+    headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${mlAccessToken}`
+    }
+});
 
         const dados = await resposta.json();
 
