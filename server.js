@@ -1260,9 +1260,17 @@ app.get(
                     resultados
                 );
 
+                const melhoresCandidatos =
+    await buscarDetalhesMelhoresCandidatos(
+        resultadosOrdenados
+    );
+
+
             res.json({
                 busca: termo,
                 total: resultadosOrdenados.length,
+                
+                melhoresCandidatos,
 
                 produtos: resultadosOrdenados.map(
                     item => ({
@@ -1316,6 +1324,114 @@ app.get(
         }
     }
 );
+
+
+async function buscarDetalhesProdutoMercadoLivre(catalogId) {
+    if (!mlAccessToken) {
+        const erro = new Error(
+            "Mercado Livre ainda não foi autorizado."
+        );
+
+        erro.status = 401;
+        throw erro;
+    }
+
+    const url =
+        `https://api.mercadolibre.com/products/${encodeURIComponent(catalogId)}`;
+
+    const resposta = await fetch(url, {
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${mlAccessToken}`
+        }
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+        const erro = new Error(
+            "Erro ao consultar detalhes do produto."
+        );
+
+        erro.status = resposta.status;
+        erro.detalhes = dados;
+
+        throw erro;
+    }
+
+    return {
+        id: dados.id || catalogId,
+        nome: dados.name || null,
+        dominio: dados.domain_id || null,
+
+        imagem:
+            dados.pictures?.[0]?.url ||
+            dados.pictures?.[0]?.secure_url ||
+            null,
+
+        atributos: Array.isArray(dados.attributes)
+            ? dados.attributes.map(atributo => ({
+                id: atributo.id,
+                nome: atributo.name,
+                valor:
+                    atributo.value_name ||
+                    atributo.value_id ||
+                    null
+            }))
+            : []
+    };
+}
+
+
+function obterMelhoresCandidatos(resultadosOrdenados) {
+    if (
+        !Array.isArray(resultadosOrdenados) ||
+        resultadosOrdenados.length === 0
+    ) {
+        return [];
+    }
+
+    const maiorCompatibilidade =
+        resultadosOrdenados[0].compatibilidade;
+
+    return resultadosOrdenados.filter(
+        item =>
+            item.compatibilidade ===
+            maiorCompatibilidade
+    );
+}
+
+
+async function buscarDetalhesMelhoresCandidatos(
+    resultadosOrdenados
+) {
+    const melhoresCandidatos =
+        obterMelhoresCandidatos(
+            resultadosOrdenados
+        );
+
+    const candidatosDetalhados =
+        await Promise.all(
+            melhoresCandidatos.map(
+                async item => {
+                    const detalhes =
+                        await buscarDetalhesProdutoMercadoLivre(
+                            item.produto.id
+                        );
+
+                    return {
+                        compatibilidade:
+                            item.compatibilidade,
+
+                        ...detalhes
+                    };
+                }
+            )
+        );
+
+    return candidatosDetalhados;
+}
+
 
 // ==================================================
 // TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
