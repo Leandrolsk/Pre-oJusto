@@ -1269,7 +1269,7 @@ app.get(
             res.json({
                 busca: termo,
                 total: resultadosOrdenados.length,
-                
+
                 melhoresCandidatos,
 
                 produtos: resultadosOrdenados.map(
@@ -1419,12 +1419,21 @@ async function buscarDetalhesMelhoresCandidatos(
                             item.produto.id
                         );
 
-                    return {
-                        compatibilidade:
-                            item.compatibilidade,
+                    const candidato = {
+    compatibilidade:
+        item.compatibilidade,
 
-                        ...detalhes
-                    };
+    ...detalhes
+};
+
+return {
+    ...candidato,
+
+    qualidadeAtributos:
+        calcularQualidadeAtributos(
+            candidato
+        )
+};
                 }
             )
         );
@@ -1432,6 +1441,57 @@ async function buscarDetalhesMelhoresCandidatos(
     return candidatosDetalhados;
 }
 
+
+function calcularQualidadeAtributos(candidato) {
+    if (
+        !candidato ||
+        !Array.isArray(candidato.atributos)
+    ) {
+        return 0;
+    }
+
+    const atributos = candidato.atributos;
+
+    let pontos = 0;
+
+    const atributosImportantes = [
+        "BRAND",
+        "MODEL",
+        "SUBMODEL",
+        "DETAILED_MODEL",
+        "ALPHANUMERIC_MODEL",
+        "CAPACITY",
+        "COLOR",
+        "MAIN_COLOR",
+        "EDITION",
+        "MANUFACTURER",
+        "MPN"
+    ];
+
+    for (const id of atributosImportantes) {
+        const atributo = atributos.find(
+            item =>
+                item.id === id &&
+                item.valor
+        );
+
+        if (atributo) {
+            pontos += 10;
+        }
+    }
+
+    const quantidadePreenchida =
+        atributos.filter(
+            atributo => atributo.valor
+        ).length;
+
+    pontos += Math.min(
+        quantidadePreenchida,
+        50
+    );
+
+    return pontos;
+}
 
 // ==================================================
 // TESTE - OFERTAS DO CATÁLOGO MERCADO LIVRE
