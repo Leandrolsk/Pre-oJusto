@@ -1597,7 +1597,7 @@ function calcularPontuacaoFinalMercadoLivre(candidato) {
         Number(candidato.qualidadeAtributos) || 0;
 
     const qualidadeLimitada =
-        Math.min(qualidadeAtributos, 100);
+    Math.min(qualidadeAtributos, 200) / 2;
 
     const pontuacao =
         compatibilidadeNome * 0.60 +
