@@ -1438,19 +1438,28 @@ async function buscarDetalhesMelhoresCandidatos(
     ...detalhes
 };
 
-return {
+const candidatoAvaliado = {
     ...candidato,
 
     qualidadeAtributos:
-    calcularQualidadeAtributos(
-        candidato
-    ),
+        calcularQualidadeAtributos(
+            candidato
+        ),
 
-compatibilidadeAtributos:
-    calcularCompatibilidadeAtributos(
-        nomeProduto,
-        candidato
-    )
+    compatibilidadeAtributos:
+        calcularCompatibilidadeAtributos(
+            nomeProduto,
+            candidato
+        )
+};
+
+return {
+    ...candidatoAvaliado,
+
+    pontuacaoFinal:
+        calcularPontuacaoFinalMercadoLivre(
+            candidatoAvaliado
+        )
 };
                 }
             )
@@ -1525,6 +1534,32 @@ function calcularQualidadeAtributos(candidato) {
     ) {
         return 0;
     }
+    
+    function calcularPontuacaoFinalMercadoLivre(candidato) {
+    if (!candidato) {
+        return 0;
+    }
+
+    const compatibilidadeNome =
+        Number(candidato.compatibilidade) || 0;
+
+    const compatibilidadeAtributos =
+        Number(candidato.compatibilidadeAtributos) || 0;
+
+    const qualidadeAtributos =
+        Number(candidato.qualidadeAtributos) || 0;
+
+    const qualidadeLimitada =
+        Math.min(qualidadeAtributos, 100);
+
+    const pontuacao =
+        compatibilidadeNome * 0.60 +
+        compatibilidadeAtributos * 0.30 +
+        qualidadeLimitada * 0.10;
+
+    return Math.round(pontuacao);
+}
+
 
     const nomeNormalizado =
         normalizarTextoMercadoLivre(nomeProduto);
