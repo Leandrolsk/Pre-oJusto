@@ -1599,10 +1599,32 @@ function calcularPontuacaoFinalMercadoLivre(candidato) {
     const qualidadeLimitada =
     Math.min(qualidadeAtributos, 200) / 2;
 
+    const atributos = candidato.atributos || [];
+
+    const modelo = atributos.find(
+    atributo => atributo.id === "MODEL"
+    )?.valor || "";
+
+    const modeloDetalhado = atributos.find(
+        atributo => atributo.id === "DETAILED_MODEL"
+    )?.valor || "";
+
+        const modeloNormalizado = modelo.toUpperCase();
+    const modeloDetalhadoNormalizado = modeloDetalhado.toUpperCase();
+
+    const modeloContraditorio =
+        (modeloNormalizado.includes("SNV3") &&
+        modeloDetalhadoNormalizado.includes("SNV2")) ||
+        (modeloNormalizado.includes("SNV2") &&
+        modeloDetalhadoNormalizado.includes("SNV3"));
+
+    const penalidadeModelo = modeloContraditorio ? 30 : 0;
+
     const pontuacao =
         compatibilidadeNome * 0.60 +
         compatibilidadeAtributos * 0.30 +
-        qualidadeLimitada * 0.10;
+        qualidadeLimitada * 0.10 -
+        penalidadeModelo;
 
     return Math.round(pontuacao);
 }
