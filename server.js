@@ -1612,13 +1612,25 @@ function calcularPontuacaoFinalMercadoLivre(candidato) {
         const modeloNormalizado = modelo.toUpperCase();
     const modeloDetalhadoNormalizado = modeloDetalhado.toUpperCase();
 
+
+    const nomeNormalizado =
+    (candidato.nome || "").toUpperCase();
+
+const contradicaoNomeModelo =
+    (nomeNormalizado.includes("NV3") &&
+     modeloNormalizado.includes("SNV2")) ||
+    (nomeNormalizado.includes("NV2") &&
+     modeloNormalizado.includes("SNV3"));
+
+
     const modeloContraditorio =
         (modeloNormalizado.includes("SNV3") &&
         modeloDetalhadoNormalizado.includes("SNV2")) ||
         (modeloNormalizado.includes("SNV2") &&
         modeloDetalhadoNormalizado.includes("SNV3"));
 
-    const penalidadeModelo = modeloContraditorio ? 30 : 0;
+   const penalidadeModelo =
+    (modeloContraditorio || contradicaoNomeModelo) ? 30 : 0;
 
     const pontuacao =
         compatibilidadeNome * 0.60 +
