@@ -1632,11 +1632,25 @@ const contradicaoNomeModelo =
    const penalidadeModelo =
     (modeloContraditorio || contradicaoNomeModelo) ? 30 : 0;
 
+
+    const nomeProduto = (candidato.nome || "").toLowerCase();
+
+    const acessorios = atributos.find(
+        atributo => atributo.id === "ACCESSORIES_INCLUDED"
+    )?.valor?.toLowerCase() || "";
+
+    const possuiKitExtra =
+        nomeProduto.includes("cabletime") ||
+        acessorios.includes("cabletime");
+
+    const penalidadeKit = possuiKitExtra ? 20 : 0;
+
     const pontuacao =
-        compatibilidadeNome * 0.60 +
-        compatibilidadeAtributos * 0.30 +
-        qualidadeLimitada * 0.10 -
-        penalidadeModelo;
+    compatibilidadeNome * 0.60 +
+    compatibilidadeAtributos * 0.30 +
+    qualidadeLimitada * 0.10 -
+    penalidadeModelo -
+    penalidadeKit;
 
     return Math.round(pontuacao);
 }
