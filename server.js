@@ -1651,13 +1651,26 @@ const contradicaoNomeModelo =
 
     const penalidadeKit = possuiKitExtra ? 20 : 0;
 
+    const edicao = atributos.find(
+    atributo => atributo.id === "EDITION"
+)?.valor?.toLowerCase() || "";
+
+const possuiEdicaoEspecial =
+    edicao.includes("starter bundle") ||
+    edicao.includes("bundle") ||
+    edicao.includes("limited edition");
+
+const penalidadeEdicao = possuiEdicaoEspecial ? 10 : 0;
+
+
     const pontuacao =
     compatibilidadeNome * 0.60 +
     compatibilidadeAtributos * 0.30 +
     qualidadeLimitada * 0.10 -
     penalidadeModelo -
-    penalidadeKit;
-
+    penalidadeKit -
+    penalidadeEdicao;
+    
     return Math.round(pontuacao);
 }
 
