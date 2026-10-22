@@ -1646,8 +1646,8 @@ const contradicaoNomeModelo =
     )?.valor?.toLowerCase() || "";
 
     const possuiKitExtra =
-        nomeProduto.includes("cabletime") ||
-        acessorios.includes("cabletime");
+    /\b(kit|combo|capa|case|adaptador|gabinete)\b/i.test(nomeProduto) ||
+    /\b(capa|case|adaptador|gabinete)\b/i.test(acessorios);
 
     const penalidadeKit = possuiKitExtra ? 20 : 0;
 
