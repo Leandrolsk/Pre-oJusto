@@ -1465,7 +1465,9 @@ return {
             )
         );
 
-    return candidatosDetalhados;
+    return candidatosDetalhados.sort(
+    (a, b) => b.pontuacaoFinal - a.pontuacaoFinal
+);
 }
 
 
