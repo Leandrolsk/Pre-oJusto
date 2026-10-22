@@ -1276,6 +1276,10 @@ app.get(
         resultadosOrdenados
     );
 
+    melhoresCandidatos.sort(
+    (a, b) => b.pontuacaoFinal - a.pontuacaoFinal
+);
+
 
             res.json({
                 busca: termo,
